@@ -17,7 +17,7 @@
     },
     "require": {
         "basic-app/crud": "*",
-        "composer-plugin-api": "^1.0",
+        "composer-plugin-api": "^1.0 || ^2.0",
         "codeigniter4/framework": "*",
         "denis303/codeigniter4-nested-views": "*",
         "denis303/codeigniter4-form": "*",
@@ -28,5 +28,10 @@
         "denis303/php-zip-helper": "*",
         "denis303/php-traits": "*",
         "phptheme/html-helper": "*"
-    }
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-latest"
+    },
+    "minimum-stability": "dev",
+    "description": ""
 }

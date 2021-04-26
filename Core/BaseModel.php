@@ -4,8 +4,10 @@
  * @license MIT
  * @link http://basic-app.com
  */
+
 namespace BasicApp\Core;
 
+use CodeIgniter\Database\Exceptions\DataException;
 use Exception;
 
 use denis303\traits\FactoryTrait;
@@ -30,7 +32,7 @@ abstract class BaseModel extends \CodeIgniter\Model
 
     use FieldLabelsTrait;
 
-    protected $afterFind = ['afterFind']; 
+    protected $afterFind = ['afterFind'];
 
     protected $beforeInsert = ['beforeInsert'];
 
@@ -65,9 +67,9 @@ abstract class BaseModel extends \CodeIgniter\Model
      * When I save the model without changes i get an error: "You must use the "set" method to update an entry."
      * To fix this I change the $onlyChanged default value from "true" to "false".
      *
-     * ToDo: Remove this later...  
+     * ToDo: Remove this later...
      */
-    public static function classToArray($data, $primaryKey = null, string $dateFormat = 'datetime', bool $onlyChanged = false) : array 
+    public static function classToArray($data, $primaryKey = null, string $dateFormat = 'datetime', bool $onlyChanged = false): array
     {
         return parent::classToArray($data, $primaryKey, $dateFormat, $onlyChanged);
     }
@@ -78,10 +80,10 @@ abstract class BaseModel extends \CodeIgniter\Model
      *
      * ToDo: Remove this later...
      */
-    protected function cleanValidationRules(array $rules, array $data = null): array
-    {
-        return $rules;
-    } 
+//    protected function cleanValidationRules(array $rules, array $data = null): array
+//    {
+//        return $rules;
+//    }
 
     public function getPrimaryKey()
     {
@@ -99,38 +101,33 @@ abstract class BaseModel extends \CodeIgniter\Model
 
         $errors = parent::errors($forceDB);
 
-        if (!$errors)
-        {
+        if (!$errors) {
             $errors = null;
         }
 
-        if ($errors)
-        {
+        if ($errors) {
             $labels = $this->getFieldLabels();
 
-            foreach($errors as $key => $value)
-            {
+            foreach ($errors as $key => $value) {
                 $errors[$key] = strtr($errors[$key], $labels);
-            }   
+            }
         }
-        
+
         return $errors;
     }
 
-    public function afterFind(array $params) : array
+    public function afterFind(array $params): array
     {
-        foreach(array_keys($this->behaviors()) as $behavior)
-        {
+        foreach (array_keys($this->behaviors()) as $behavior) {
             $params = $this->as($behavior)->afterFind($params);
         }
 
-        return $params;    
+        return $params;
     }
 
-    public function beforeInsert(array $params) : array
+    public function beforeInsert(array $params): array
     {
-        foreach(array_keys($this->behaviors()) as $behavior)
-        {
+        foreach (array_keys($this->behaviors()) as $behavior) {
             $params = $this->as($behavior)->beforeInsert($params);
         }
 
@@ -139,16 +136,14 @@ abstract class BaseModel extends \CodeIgniter\Model
 
     public function afterInsert(array $params)
     {
-        foreach(array_keys($this->behaviors()) as $behavior)
-        {
+        foreach (array_keys($this->behaviors()) as $behavior) {
             $this->as($behavior)->afterInsert($params);
         }
     }
 
-    public function beforeUpdate(array $params) : array
+    public function beforeUpdate(array $params): array
     {
-        foreach(array_keys($this->behaviors()) as $behavior)
-        {
+        foreach (array_keys($this->behaviors()) as $behavior) {
             $params = $this->as($behavior)->beforeUpdate($params);
         }
 
@@ -157,69 +152,62 @@ abstract class BaseModel extends \CodeIgniter\Model
 
     public function afterUpdate(array $params)
     {
-        foreach(array_keys($this->behaviors()) as $behavior)
-        {
+        foreach (array_keys($this->behaviors()) as $behavior) {
             $this->as($behavior)->afterUpdate($params);
         }
     }
 
     public function beforeDelete(array $params)
     {
-        foreach(array_keys($this->behaviors()) as $behavior)
-        {
+        foreach (array_keys($this->behaviors()) as $behavior) {
             $this->as($behavior)->beforeDelete($params);
         }
     }
 
     public function afterDelete(array $params)
     {
-        foreach(array_keys($this->behaviors()) as $behavior)
-        {
+        foreach (array_keys($this->behaviors()) as $behavior) {
             $this->as($behavior)->afterDelete($params);
         }
     }
 
-    protected function beforeSave(array $params) : array
+    protected function beforeSave(array $params): array
     {
-        foreach(array_keys($this->behaviors()) as $behavior)
-        {
+        foreach (array_keys($this->behaviors()) as $behavior) {
             $params = $this->as($behavior)->beforeSave($params);
         }
 
         return $params;
     }
 
-    protected function afterSave(array $params) : array
+    protected function afterSave(array $params): array
     {
-        foreach(array_keys($this->behaviors()) as $behavior)
-        {
+        foreach (array_keys($this->behaviors()) as $behavior) {
             $params = $this->as($behavior)->afterSave($params);
         }
 
         return $params;
     }
 
-    protected function beforeValidate(array $params) : array
+    protected function beforeValidate(array $params): array
     {
-        foreach(array_keys($this->behaviors()) as $behavior)
-        {
+        foreach (array_keys($this->behaviors()) as $behavior) {
             $params = $this->as($behavior)->beforeValidate($params);
         }
 
         return $params;
     }
 
-    protected function afterValidate(array $params) : array
+    protected function afterValidate(array $params): array
     {
-        foreach(array_keys($this->behaviors()) as $behavior)
-        {
+        foreach (array_keys($this->behaviors()) as $behavior) {
             $params = $this->as($behavior)->afterValidate($params);
         }
 
         return $params;
     }
 
-    public function validate($data) : bool
+    public function validate($data): bool
     {
         // save validation rules
 
@@ -237,12 +225,9 @@ abstract class BaseModel extends \CodeIgniter\Model
         //
         // ToDo: Remove this later...
 
-        if (is_object($data) && method_exists($data, 'toArray'))
-        {
+        if (is_object($data) && method_exists($data, 'toArray')) {
             $values = $data->toArray();
-        }
-        else
-        {
+        } else {
             $values = $data;
         }
 
@@ -263,16 +248,20 @@ abstract class BaseModel extends \CodeIgniter\Model
         return $params['result'];
     }
 
-    public function save($data) : bool
+    public function save($data): bool
     {
         $params = $this->trigger('beforeSave', ['data' => $data]);
 
         $data = $params['data'];
 
-        $result = parent::save($data);
+        $result = false;
+        try {
+            $result = parent::save($data);
+        } catch (DataException $e) {
+            print($e->getCode() . ' - ' . $e->getMessage());
+        }
 
-        if ($result && $this->insertID)
-        {
+        if ($result && $this->insertID) {
             static::setEntityField($data, $this->primaryKey, $this->insertID);
         }
 
